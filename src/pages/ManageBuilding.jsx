@@ -6,18 +6,20 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import BottomNav from '../components/ui/BottomNav';
 import BackButton from '../components/ui/BackButton';
+import AllPDFsManager from '../components/Admin/AllPDFsManager';
 
 const ManageBuilding = () => {
   const { user } = useAuth();
   const [buildings, setBuildings] = useState([]);
   const [editingBuilding, setEditingBuilding] = useState(null);
   const [newBuilding, setNewBuilding] = useState({
-    name: '', address: '', technologySummary: '', complexityPercentage: 0, requiredTechnicians: 1, parkingType: 'Underground', parkingInstructions: '', direction: 'N/A'
+    name: '', address: '', technology: 'Huawei', complexityPercentage: 0, requiredTechnicians: 1, parkingType: 'Underground', parkingInstructions: '', direction: 'N/A'
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('buildings'); // buildings, floors-risers, images, pdfs
   const [selectedBuildingId, setSelectedBuildingId] = useState('');
+  const [showAllPdfs, setShowAllPdfs] = useState(false); // For PDF sub-tabs
   const [pdfs, setPdfs] = useState([]);
   const [newPdf, setNewPdf] = useState({ title: '', tech: 'Huawei', url: '' });
   const [file, setFile] = useState(null);
@@ -80,7 +82,7 @@ const ManageBuilding = () => {
     }
   }, [selectedBuildingId, buildings]);
 
-  // Function to get all linked PDFs for the currently selected building
+
   const getLinkedPDFs = () => {
     if (!buildings || !selectedBuildingId) return [];
 
@@ -195,6 +197,7 @@ const ManageBuilding = () => {
   const startEditingBuilding = (building) => {
     setEditingBuilding({
       ...building,
+      technology: building.technology || building.technologySummary || 'Huawei',
       direction: building.direction || 'N/A'
     });
   };
@@ -612,7 +615,14 @@ const ManageBuilding = () => {
               <form onSubmit={handleCreateBuilding}>
                 <Input label="Name" value={newBuilding.name} onChange={(e) => handleChangeBuilding(e, 'name')} required />
                 <Input label="Address" value={newBuilding.address} onChange={(e) => handleChangeBuilding(e, 'address')} />
-                <Input label="Technology Summary" value={newBuilding.technologySummary} onChange={(e) => handleChangeBuilding(e, 'technologySummary')} />
+                <select value={newBuilding.technology} onChange={(e) => handleChangeBuilding(e, 'technology')} className="input-mockup mb-2 w-full">
+                  <option value="Huawei">Huawei</option>
+                  <option value="Nokia">Nokia</option>
+                  <option value="SmartOLT">SmartOLT</option>
+                  <option value="U2000">U2000</option>
+                  <option value="Positron">Positron</option>
+                  <option value="Other">Other</option>
+                </select>
                 <Input label="Complexity %" type="number" value={newBuilding.complexityPercentage} onChange={(e) => handleChangeBuilding(e, 'complexityPercentage')} />
                 <Input label="Required Techs" type="number" value={newBuilding.requiredTechnicians} onChange={(e) => handleChangeBuilding(e, 'requiredTechnicians')} />
                 <select value={newBuilding.parkingType} onChange={(e) => handleChangeBuilding(e, 'parkingType')} className="input-mockup mb-2">
@@ -637,7 +647,7 @@ const ManageBuilding = () => {
                   <option value="Front">Front</option>
                   <option value="Back">Back</option>
                 </select>
-                <Button type="submit" className="btn-mockup mt-2">Create Building</Button>
+                <Button type="submit" className="btn-mockup mt-2">Add Building</Button>
               </form>
             </Card>
 
@@ -647,7 +657,14 @@ const ManageBuilding = () => {
                 <form onSubmit={handleUpdateBuilding}>
                   <Input label="Name" value={editingBuilding.name} onChange={(e) => handleChangeBuilding(e, 'name', true)} required />
                   <Input label="Address" value={editingBuilding.address} onChange={(e) => handleChangeBuilding(e, 'address', true)} />
-                  <Input label="Technology Summary" value={editingBuilding.technologySummary} onChange={(e) => handleChangeBuilding(e, 'technologySummary', true)} />
+                  <select value={editingBuilding.technology} onChange={(e) => handleChangeBuilding(e, 'technology', true)} className="input-mockup mb-2 w-full">
+                    <option value="Huawei">Huawei</option>
+                    <option value="Nokia">Nokia</option>
+                    <option value="SmartOLT">SmartOLT</option>
+                    <option value="U2000">U2000</option>
+                    <option value="Positron">Positron</option>
+                    <option value="Other">Other</option>
+                  </select>
                   <Input label="Complexity %" type="number" value={editingBuilding.complexityPercentage} onChange={(e) => handleChangeBuilding(e, 'complexityPercentage', true)} />
                   <Input label="Required Techs" type="number" value={editingBuilding.requiredTechnicians} onChange={(e) => handleChangeBuilding(e, 'requiredTechnicians', true)} />
                   <select value={editingBuilding.parkingType} onChange={(e) => handleChangeBuilding(e, 'parkingType', true)} className="input-mockup mb-2">
@@ -702,139 +719,173 @@ const ManageBuilding = () => {
         {/* PDFs Tab */}
         {activeTab === 'pdfs' && (
           <div>
-            <select
-              value={selectedBuildingId}
-              onChange={(e) => setSelectedBuildingId(e.target.value)}
-              className="input-mockup mb-4 w-full"
-            >
-              <option value="">Select a Building</option>
-              {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-            </select>
+            {/* Sub-tab Navigation for PDFs */}
+            <div className="flex border-b border-gray-600 mb-4">
+              <button
+                className={`py-2 px-4 font-medium ${!showAllPdfs ? 'text-[#00BFA5] border-b-2 border-[#00BFA5]' : 'text-gray-400'}`}
+                onClick={() => setShowAllPdfs(false)}
+              >
+                Building PDFs
+              </button>
+              <button
+                className={`py-2 px-4 font-medium ${showAllPdfs ? 'text-[#00BFA5] border-b-2 border-[#00BFA5]' : 'text-gray-400'}`}
+                onClick={() => setShowAllPdfs(true)}
+              >
+                All PDFs
+              </button>
+            </div>
 
-            {selectedBuildingId && (
-              <>
-                <Card className="mockup-card mb-4">
-                  <h3 className="mockup-card-header">Add PDF to {buildings.find(b => b.id === selectedBuildingId)?.name}</h3>
-
-                  {/* File upload section */}
-                  <div className="mb-2">
-                    <label className="block text-sm font-medium mb-1">Upload PDF File</label>
-                    <input
-                      type="file"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md"
-                    />
-                  </div>
-
-                  <Input label="PDF Title" value={newPdf.title} onChange={(e) => setNewPdf({...newPdf, title: e.target.value})} />
+            {/* Building-specific PDFs view */}
+            {!showAllPdfs && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
                   <select
-                    value={newPdf.tech}
-                    onChange={(e) => setNewPdf({...newPdf, tech: e.target.value})}
-                    className="input-mockup mb-2"
+                    value={selectedBuildingId}
+                    onChange={(e) => setSelectedBuildingId(e.target.value)}
+                    className="input-mockup w-2/3"
                   >
-                    <option value="Huawei">Huawei</option>
-                    <option value="Nokia">Nokia</option>
-                    <option value="SmartOLT">SmartOLT</option>
-                    <option value="U2000">U2000</option>
-                    <option value="Positron">Positron</option>
-                    <option value="Other">Other</option>
+                    <option value="">Select a Building</option>
+                    {buildings.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                   </select>
-                  <Input label="PDF URL" value={newPdf.url} onChange={(e) => setNewPdf({...newPdf, url: e.target.value})} placeholder="https://example.com/document.pdf" />
+                  <Button
+                    onClick={() => setShowAllPdfs(true)}
+                    className="btn-mockup ml-2"
+                  >
+                    View PDF Configuration
+                  </Button>
+                </div>
 
-                  {/* Building linking options */}
-                  <div className="mb-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block text-sm font-medium">Link to other buildings:</label>
-                      <Button
-                        onClick={() => setShowPdfLinkOptions(!showPdfLinkOptions)}
-                        className="btn-mockup-outline text-xs"
+                {selectedBuildingId && (
+                  <>
+                    <Card className="mockup-card mb-4">
+                      <h3 className="mockup-card-header">Add PDF to {buildings.find(b => b.id === selectedBuildingId)?.name}</h3>
+
+                      {/* File upload section */}
+                      <div className="mb-2">
+                        <label className="block text-sm font-medium mb-1">Upload PDF File</label>
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={handleFileChange}
+                          className="w-full p-2 bg-gray-700 border border-gray-600 rounded-md"
+                        />
+                      </div>
+
+                      <Input label="PDF Title" value={newPdf.title} onChange={(e) => setNewPdf({...newPdf, title: e.target.value})} />
+                      <select
+                        value={newPdf.tech}
+                        onChange={(e) => setNewPdf({...newPdf, tech: e.target.value})}
+                        className="input-mockup mb-2"
                       >
-                        {showPdfLinkOptions ? 'Hide Options' : 'Show Options'}
-                      </Button>
-                    </div>
+                        <option value="Huawei">Huawei</option>
+                        <option value="Nokia">Nokia</option>
+                        <option value="SmartOLT">SmartOLT</option>
+                        <option value="U2000">U2000</option>
+                        <option value="Positron">Positron</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <Input label="PDF URL" value={newPdf.url} onChange={(e) => setNewPdf({...newPdf, url: e.target.value})} placeholder="https://example.com/document.pdf" />
 
-                    {showPdfLinkOptions && (
-                      <div className="border border-gray-600 rounded p-3 mt-2">
-                        <div className="flex gap-2 mb-3">
-                          <Button onClick={selectAllPdfBuildings} className="btn-mockup text-xs flex-1">Select All</Button>
-                          <Button onClick={clearAllPdfBuildings} className="btn-mockup-outline text-xs flex-1">Clear All</Button>
+                      {/* Building linking options */}
+                      <div className="mb-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="block text-sm font-medium">Link to other buildings:</label>
+                          <Button
+                            onClick={() => setShowPdfLinkOptions(!showPdfLinkOptions)}
+                            className="btn-mockup-outline text-xs"
+                          >
+                            {showPdfLinkOptions ? 'Hide Options' : 'Show Options'}
+                          </Button>
                         </div>
 
-                        <div className="max-h-40 overflow-y-auto">
-                          {buildings
-                            .filter(b => b.id !== selectedBuildingId) // Exclude the current building
-                            .map(building => (
-                              <div key={building.id} className="flex items-center mb-1">
-                                <input
-                                  type="checkbox"
-                                  id={`pdf-building-${building.id}`}
-                                  checked={pdfBuildingsToLink.includes(building.id)}
-                                  onChange={() => togglePdfBuildingLink(building.id)}
-                                  className="mr-2"
-                                />
-                                <label htmlFor={`pdf-building-${building.id}`} className="flex-1 text-sm">
-                                  {building.name}
-                                </label>
-                              </div>
-                            ))}
+                        {showPdfLinkOptions && (
+                          <div className="border border-gray-600 rounded p-3 mt-2">
+                            <div className="flex gap-2 mb-3">
+                              <Button onClick={selectAllPdfBuildings} className="btn-mockup text-xs flex-1">Select All</Button>
+                              <Button onClick={clearAllPdfBuildings} className="btn-mockup-outline text-xs flex-1">Clear All</Button>
+                            </div>
+
+                            <div className="max-h-40 overflow-y-auto">
+                              {buildings
+                                .filter(b => b.id !== selectedBuildingId) // Exclude the current building
+                                .map(building => (
+                                  <div key={building.id} className="flex items-center mb-1">
+                                    <input
+                                      type="checkbox"
+                                      id={`pdf-building-${building.id}`}
+                                      checked={pdfBuildingsToLink.includes(building.id)}
+                                      onChange={() => togglePdfBuildingLink(building.id)}
+                                      className="mr-2"
+                                    />
+                                    <label htmlFor={`pdf-building-${building.id}`} className="flex-1 text-sm">
+                                      {building.name}
+                                    </label>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {uploading && (
+                        <div className="mb-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-center mt-1">Uploading... {uploadProgress}%</p>
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
 
-                  {uploading && (
-                    <div className="mb-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div
-                          className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                          style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-center mt-1">Uploading... {uploadProgress}%</p>
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 mt-2">
-                    <Button
-                      onClick={handleUploadPdf}
-                      disabled={!file || uploading}
-                      className="btn-mockup flex-grow"
-                    >
-                      {uploading ? 'Uploading...' : 'Upload PDF'}
-                    </Button>
-                    <Button
-                      onClick={handleAddPdfByUrl}
-                      disabled={uploading}
-                      className="btn-mockup flex-grow"
-                    >
-                      Add by URL
-                    </Button>
-                  </div>
-                </Card>
-
-                <h2 className="text-xl font-bold mt-4 mb-2">PDFs</h2>
-                <div className="space-y-2">
-                  {pdfs.map(pdf => (
-                    <Card key={pdf.id} className="mockup-card flex justify-between items-center">
-                      <div>
-                        <h3 className="font-bold">{pdf.title}</h3>
-                        <p className="text-sm text-gray-400">Tech: {pdf.tech}</p>
-                        {pdf.isLinked && pdf.sourceBuilding && (
-                          <p className="text-xs text-teal-400">From: {pdf.sourceBuilding}</p>
-                        )}
-                        {pdf.linkedBuildingIds && pdf.linkedBuildingIds.length > 0 && (
-                          <p className="text-xs text-teal-400">Linked to {pdf.linkedBuildingIds.length} other building(s)</p>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Button onClick={() => window.open(pdf.url, '_blank')} className="btn-mockup-outline text-xs">View</Button>
-                        <Button onClick={() => handleDeletePdf(pdf.id)} className="btn-mockup-outline text-xs bg-red-600 hover:bg-red-700">Delete</Button>
+                      <div className="flex gap-2 mt-2">
+                        <Button
+                          onClick={handleUploadPdf}
+                          disabled={!file || uploading}
+                          className="btn-mockup flex-grow"
+                        >
+                          {uploading ? 'Uploading...' : 'Upload PDF'}
+                        </Button>
+                        <Button
+                          onClick={handleAddPdfByUrl}
+                          disabled={uploading}
+                          className="btn-mockup flex-grow"
+                        >
+                          Add by URL
+                        </Button>
                       </div>
                     </Card>
-                  ))}
-                </div>
-              </>
+
+                    <h2 className="text-xl font-bold mt-4 mb-2">PDFs</h2>
+                    <div className="space-y-2">
+                      {pdfs.map(pdf => (
+                        <Card key={pdf.id} className="mockup-card flex justify-between items-center">
+                          <div>
+                            <h3 className="font-bold">{pdf.title}</h3>
+                            <p className="text-sm text-gray-400">Tech: {pdf.tech}</p>
+                            {pdf.isLinked && pdf.sourceBuilding && (
+                              <p className="text-xs text-teal-400">From: {pdf.sourceBuilding}</p>
+                            )}
+                            {pdf.linkedBuildingIds && pdf.linkedBuildingIds.length > 0 && (
+                              <p className="text-xs text-teal-400">Linked to {pdf.linkedBuildingIds.length} other building(s)</p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button onClick={() => window.open(pdf.url, '_blank')} className="btn-mockup-outline text-xs">View</Button>
+                            <Button onClick={() => handleDeletePdf(pdf.id)} className="btn-mockup-outline text-xs bg-red-600 hover:bg-red-700">Delete</Button>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* All PDFs view */}
+            {showAllPdfs && (
+              <AllPDFsManager />
             )}
           </div>
         )}

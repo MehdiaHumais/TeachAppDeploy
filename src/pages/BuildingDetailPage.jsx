@@ -5,8 +5,8 @@ import { getBuildingById, findNearestRisers, getBuildings, findRisersOnFloor } f
 import BottomNav from '../components/ui/BottomNav';
 import BackButton from '../components/ui/BackButton';
 import Button from '../components/ui/Button';
-import FloorSelector from "../components/Building/FloorSelector";
-import NearestRiserDisplay from "../components/Building/NearestRiserDisplay";
+import FloorSelector from '../components/Building/FloorSelector';
+import NearestRiserDisplay from '../components/Building/NearestRiserDisplay';
 
 const BuildingDetailPage = () => {
   const { id } = useParams();
@@ -16,7 +16,7 @@ const BuildingDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedFloor, setSelectedFloor] = useState(null);
-  const [riserInfo, setRiserInfo] = useState({ above: null, below: null });
+  const [riserInfo, setRiserInfo] = useState({ onCurrentFloor: [], above: null, below: null });
   const [risersOnFloor, setRisersOnFloor] = useState([]);
   const [imageSections, setImageSections] = useState({
     parking: false,
@@ -81,10 +81,11 @@ const BuildingDetailPage = () => {
       const info = findNearestRisers(building, selectedFloor);
       setRiserInfo(info);
 
-      // Also find risers that are on this specific floor
+      // Also find risers that are on this specific floor (this will now be the same as onCurrentFloor)
       const risers = findRisersOnFloor(building, selectedFloor);
       setRisersOnFloor(risers);
     } else {
+      setRiserInfo({ onCurrentFloor: [], above: null, below: null });
       setRisersOnFloor([]);
     }
   }, [building, selectedFloor]);

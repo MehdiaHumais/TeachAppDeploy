@@ -471,19 +471,33 @@ export const findNearestRisers = (building, currentFloor) => {
         ...riser,
         floorsCoveredArray: floors,
         minFloor: Math.min(...floors),
-        maxFloor: Math.max(...floors)
+        maxFloor: Math.max(...floors),
+        isOnCurrentFloor: floors.includes(currentFloor)
       };
     });
 
+    // Find risers on the current floor
+    const onCurrentFloor = risersWithFloors.filter(r => r.isOnCurrentFloor);
+
+    // Find risers above the current floor
     const above = risersWithFloors
       .filter(r => r.minFloor > currentFloor)
-      .sort((a, b) => a.minFloor - b.minFloor)[0] || null;
+      .map(r => ({
+        ...r,
+        distance: r.minFloor - currentFloor
+      }))
+      .sort((a, b) => a.distance - b.distance)[0] || null;
 
+    // Find risers below the current floor
     const below = risersWithFloors
       .filter(r => r.maxFloor < currentFloor)
-      .sort((a, b) => b.maxFloor - a.maxFloor)[0] || null;
+      .map(r => ({
+        ...r,
+        distance: currentFloor - r.maxFloor
+      }))
+      .sort((a, b) => a.distance - b.distance)[0] || null;
 
-    return { above, below };
+    return { onCurrentFloor, above, below };
   }
 };
 

@@ -6,6 +6,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import BottomNav from '../components/ui/BottomNav';
 import BackButton from '../components/ui/BackButton';
+import AllPDFsManager from '../components/Admin/AllPDFsManager';
 
 const ManageBuildings = () => {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ const ManageBuildings = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('buildings'); // Add tab state
 
   console.log("ManageBuildings: Component rendering. User from context:", user);
 
@@ -142,71 +144,107 @@ const ManageBuildings = () => {
 
   return (
     <div className="full-screen bg-dark flex flex-col">
-      <div className="p-4 flex-grow overflow-y-auto relative"> {/* Add relative class for back button positioning */}
+      <div className="p-4 flex-grow overflow-y-auto relative">
         <div className="absolute top-4 left-4 z-10">
           <BackButton />
         </div>
-        <h1 className="text-2xl font-bold mb-4 ml-12">Manage Buildings</h1> {/* Add left margin to make space for back button */}
 
-        {error && <div className="mb-4 p-2 bg-red-600 text-white rounded">{error}</div>}
+        <div className="ml-12">
+          <h1 className="text-2xl font-bold mb-4">Manage Buildings & PDFs</h1>
 
-        <Card className="mockup-card mb-4">
-          <h3 className="mockup-card-header">Add New Building</h3>
-          <form onSubmit={handleCreate}>
-            <Input label="Name" value={newBuilding.name} onChange={(e) => handleChange(e, 'name')} required />
-            <Input label="Address" value={newBuilding.address} onChange={(e) => handleChange(e, 'address')} />
-            <Input label="Technology Summary" value={newBuilding.technologySummary} onChange={(e) => handleChange(e, 'technologySummary')} />
-            <Input label="Complexity %" type="number" value={newBuilding.complexityPercentage} onChange={(e) => handleChange(e, 'complexityPercentage')} />
-            <Input label="Required Techs" type="number" value={newBuilding.requiredTechnicians} onChange={(e) => handleChange(e, 'requiredTechnicians')} />
-            <select value={newBuilding.parkingType} onChange={(e) => handleChange(e, 'parkingType')} className="input-mockup mb-2">
-              <option value="Underground">Underground</option>
-              <option value="Outdoor">Outdoor</option>
-              <option value="Street">Street</option>
-              <option value="Other">Other</option>
-            </select>
-            <Input label="Parking Instructions" value={newBuilding.parkingInstructions} onChange={(e) => handleChange(e, 'parkingInstructions')} />
-            <Button type="submit" className="btn-mockup mt-2">Create Building</Button>
-          </form>
-        </Card>
+          {/* Tab Navigation */}
+          <div className="flex border-b border-gray-600 mb-4">
+            <button
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'buildings'
+                  ? 'border-b-2 border-teal-500 text-teal-400'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('buildings')}
+            >
+              Buildings
+            </button>
+            <button
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'pdfs'
+                  ? 'border-b-2 border-teal-500 text-teal-400'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+              onClick={() => setActiveTab('pdfs')}
+            >
+              PDFs
+            </button>
+          </div>
 
-        {editingBuilding && (
-          <Card className="mockup-card mb-4">
-            <h3 className="mockup-card-header">Edit Building: {editingBuilding.name}</h3>
-            <form onSubmit={handleUpdate}>
-              <Input label="Name" value={editingBuilding.name} onChange={(e) => handleChange(e, 'name', true)} required />
-              <Input label="Address" value={editingBuilding.address} onChange={(e) => handleChange(e, 'address', true)} />
-              <Input label="Technology Summary" value={editingBuilding.technologySummary} onChange={(e) => handleChange(e, 'technologySummary', true)} />
-              <Input label="Complexity %" type="number" value={editingBuilding.complexityPercentage} onChange={(e) => handleChange(e, 'complexityPercentage', true)} />
-              <Input label="Required Techs" type="number" value={editingBuilding.requiredTechnicians} onChange={(e) => handleChange(e, 'requiredTechnicians', true)} />
-              <select value={editingBuilding.parkingType} onChange={(e) => handleChange(e, 'parkingType', true)} className="input-mockup mb-2">
-                <option value="Underground">Underground</option>
-                <option value="Outdoor">Outdoor</option>
-                <option value="Street">Street</option>
-                <option value="Other">Other</option>
-              </select>
-              <Input label="Parking Instructions" value={editingBuilding.parkingInstructions} onChange={(e) => handleChange(e, 'parkingInstructions', true)} />
-              <div className="flex gap-2 mt-2">
-                <Button type="submit" className="btn-mockup">Save Changes</Button>
-                <Button type="button" onClick={() => setEditingBuilding(null)} className="btn-mockup-outline">Cancel</Button>
+          {/* Tab Content */}
+          {activeTab === 'buildings' && (
+            <div>
+              {error && <div className="mb-4 p-2 bg-red-600 text-white rounded">{error}</div>}
+
+              <Card className="mockup-card mb-4">
+                <h3 className="mockup-card-header">Add New Building</h3>
+                <form onSubmit={handleCreate}>
+                  <Input label="Name" value={newBuilding.name} onChange={(e) => handleChange(e, 'name')} required />
+                  <Input label="Address" value={newBuilding.address} onChange={(e) => handleChange(e, 'address')} />
+                  <Input label="Technology Summary" value={newBuilding.technologySummary} onChange={(e) => handleChange(e, 'technologySummary')} />
+                  <Input label="Complexity %" type="number" value={newBuilding.complexityPercentage} onChange={(e) => handleChange(e, 'complexityPercentage')} />
+                  <Input label="Required Techs" type="number" value={newBuilding.requiredTechnicians} onChange={(e) => handleChange(e, 'requiredTechnicians')} />
+                  <select value={newBuilding.parkingType} onChange={(e) => handleChange(e, 'parkingType')} className="input-mockup mb-2">
+                    <option value="Underground">Underground</option>
+                    <option value="Outdoor">Outdoor</option>
+                    <option value="Street">Street</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <Input label="Parking Instructions" value={newBuilding.parkingInstructions} onChange={(e) => handleChange(e, 'parkingInstructions')} />
+                  <Button type="submit" className="btn-mockup mt-2">Create Building</Button>
+                </form>
+              </Card>
+
+              {editingBuilding && (
+                <Card className="mockup-card mb-4">
+                  <h3 className="mockup-card-header">Edit Building: {editingBuilding.name}</h3>
+                  <form onSubmit={handleUpdate}>
+                    <Input label="Name" value={editingBuilding.name} onChange={(e) => handleChange(e, 'name', true)} required />
+                    <Input label="Address" value={editingBuilding.address} onChange={(e) => handleChange(e, 'address', true)} />
+                    <Input label="Technology Summary" value={editingBuilding.technologySummary} onChange={(e) => handleChange(e, 'technologySummary', true)} />
+                    <Input label="Complexity %" type="number" value={editingBuilding.complexityPercentage} onChange={(e) => handleChange(e, 'complexityPercentage', true)} />
+                    <Input label="Required Techs" type="number" value={editingBuilding.requiredTechnicians} onChange={(e) => handleChange(e, 'requiredTechnicians', true)} />
+                    <select value={editingBuilding.parkingType} onChange={(e) => handleChange(e, 'parkingType', true)} className="input-mockup mb-2">
+                      <option value="Underground">Underground</option>
+                      <option value="Outdoor">Outdoor</option>
+                      <option value="Street">Street</option>
+                      <option value="Other">Other</option>
+                    </select>
+                    <Input label="Parking Instructions" value={editingBuilding.parkingInstructions} onChange={(e) => handleChange(e, 'parkingInstructions', true)} />
+                    <div className="flex gap-2 mt-2">
+                      <Button type="submit" className="btn-mockup">Save Changes</Button>
+                      <Button type="button" onClick={() => setEditingBuilding(null)} className="btn-mockup-outline">Cancel</Button>
+                    </div>
+                  </form>
+                </Card>
+              )}
+
+              <h2 className="text-xl font-bold mt-4 mb-2">Existing Buildings</h2>
+              <div className="space-y-2">
+                {buildings.map(building => (
+                  <Card key={building.id} className="mockup-card flex justify-between items-center">
+                    <div>
+                      <h3 className="font-bold">{building.name}</h3>
+                      <p className="text-sm text-gray-400">{building.address}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={() => startEditing(building)} className="btn-mockup-outline text-xs">Edit</Button>
+                      <Button onClick={() => handleDelete(building.id)} className="btn-mockup-outline text-xs bg-red-600 hover:bg-red-700">Delete</Button>
+                    </div>
+                  </Card>
+                ))}
               </div>
-            </form>
-          </Card>
-        )}
+            </div>
+          )}
 
-        <h2 className="text-xl font-bold mt-4 mb-2">Existing Buildings</h2>
-        <div className="space-y-2">
-          {buildings.map(building => (
-            <Card key={building.id} className="mockup-card flex justify-between items-center">
-              <div>
-                <h3 className="font-bold">{building.name}</h3>
-                <p className="text-sm text-gray-400">{building.address}</p>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={() => startEditing(building)} className="btn-mockup-outline text-xs">Edit</Button>
-                <Button onClick={() => handleDelete(building.id)} className="btn-mockup-outline text-xs bg-red-600 hover:bg-red-700">Delete</Button>
-              </div>
-            </Card>
-          ))}
+          {activeTab === 'pdfs' && (
+            <AllPDFsManager />
+          )}
         </div>
       </div>
       <BottomNav />

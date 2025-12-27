@@ -60,11 +60,10 @@ const ManageFloorsRisers = () => {
   };
 
   const handleAddRiser = async () => {
-    if (!selectedBuildingId || !newRiser.number) return; // Basic validation
+    if (!selectedBuildingId || !newRiser.number) return;
     try {
       const newRiserObj = { number: newRiser.number, floorsCovered: newRiser.floorsCovered, locationDescription: newRiser.locationDescription };
       await addRiserToBuilding(selectedBuildingId, newRiserObj);
-      // Fetch updated list to reflect the change properly
       const updatedBuildings = await getBuildings();
       setBuildings(updatedBuildings);
       const updatedBuilding = updatedBuildings.find(b => b.id === selectedBuildingId);
@@ -80,7 +79,7 @@ const ManageFloorsRisers = () => {
   const handleDeleteFloor = async (floorId) => {
     try {
       await removeFloorFromBuilding(selectedBuildingId, floorId);
-      // Fetch updated list to reflect the change properly
+
       const updatedBuildings = await getBuildings();
       setBuildings(updatedBuildings);
       const updatedBuilding = updatedBuildings.find(b => b.id === selectedBuildingId);
@@ -95,7 +94,6 @@ const ManageFloorsRisers = () => {
   const handleDeleteRiser = async (riserId) => {
     try {
       await removeRiserFromBuilding(selectedBuildingId, riserId);
-      // Fetch updated list to reflect the change properly
       const updatedBuildings = await getBuildings();
       setBuildings(updatedBuildings);
       const updatedBuilding = updatedBuildings.find(b => b.id === selectedBuildingId);

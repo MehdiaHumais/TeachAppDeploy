@@ -38,7 +38,9 @@ const BuildingList = () => {
       building.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .filter(building =>
-      technologyFilter === '' || building.technologySummary.toLowerCase().includes(technologyFilter.toLowerCase())
+      technologyFilter === '' ||
+      (building.technology && building.technology.toLowerCase().includes(technologyFilter.toLowerCase())) ||
+      (building.technologySummary && building.technologySummary.toLowerCase().includes(technologyFilter.toLowerCase()))
     )
     .filter(building => {
       if (complexityFilter === '') return true;
@@ -114,7 +116,10 @@ const BuildingList = () => {
               <option value="">All Technologies</option>
               <option value="Huawei">Huawei</option>
               <option value="Nokia">Nokia</option>
+              <option value="SmartOLT">SmartOLT</option>
+              <option value="U2000">U2000</option>
               <option value="Positron">Positron</option>
+              <option value="Other">Other</option>
             </select>
             <select
               value={complexityFilter}
