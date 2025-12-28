@@ -5,8 +5,13 @@ import { getBuildingById, findNearestRisers, getBuildings, findRisersOnFloor } f
 import BottomNav from '../components/ui/BottomNav';
 import BackButton from '../components/ui/BackButton';
 import Button from '../components/ui/Button';
+<<<<<<< HEAD
 import FloorSelector from '../components/Building/FloorSelector';
 import NearestRiserDisplay from '../components/Building/NearestRiserDisplay';
+=======
+import FloorSelector from "../components/building/FloorSelector";
+import NearestRiserDisplay from "../components/building/NearestRiserDisplay";
+>>>>>>> 9243b010bc6c92be152c6a814972cac667c60f3a
 
 const BuildingDetailPage = () => {
   const { id } = useParams();
